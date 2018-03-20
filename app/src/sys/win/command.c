@@ -27,6 +27,12 @@ HANDLE cmd_execute(const char *path, const char *const argv[]) {
     return pi.hProcess;
 }
 
+HANDLE cmd_execute_redirect(const char *path, const char *const argv[],
+                            HANDLE *pipe_stdin, HANDLE *pipe_stdout, HANDLE *pipe_stderr) {
+    LOGW("cmd_execute_redirect() not implemented yet for Windows");
+    return NULL;
+}
+
 SDL_bool cmd_terminate(HANDLE handle) {
     return TerminateProcess(handle, 1) && CloseHandle(handle);
 }

@@ -7,6 +7,8 @@
 #include <sys/time.h>
 #include <SDL2/SDL.h>
 
+#include "aoa.h"
+#include "audio.h"
 #include "command.h"
 #include "common.h"
 #include "controller.h"
@@ -28,6 +30,7 @@ static struct screen screen = SCREEN_INITIALIZER;
 static struct frames frames;
 static struct decoder decoder;
 static struct controller controller;
+static struct audio_player audio_player;
 
 static struct input_manager input_manager = {
     .controller = &controller,
@@ -107,15 +110,22 @@ static void event_loop(void) {
 }
 
 SDL_bool scrcpy(const struct scrcpy_options *options) {
-    if (!server_start(&server, options->serial, options->port,
-                      options->max_size, options->bit_rate)) {
-        return SDL_FALSE;
+    if (!SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1")) {
+        LOGW("Cannot request to keep default signal handlers");
+    }
+
+    if (options->forward_audio) {
+        if (!audio_forwarding_start(&audio_player, options->serial)) {
+            return SDL_FALSE;
+        }
     }
 
     SDL_bool ret = SDL_TRUE;
 
-    if (!SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1")) {
-        LOGW("Cannot request to keep default signal handlers");
+    if (!server_start(&server, options->serial, options->port,
+                      options->max_size, options->bit_rate)) {
+        ret = SDL_FALSE;
+        goto finally_disable_audio_forwarding;
     }
 
     if (!sdl_video_init()) {
@@ -191,6 +201,10 @@ finally_destroy_frames:
     frames_destroy(&frames);
 finally_destroy_server:
     server_destroy(&server);
+finally_disable_audio_forwarding:
+    if (options->forward_audio) {
+        audio_forwarding_stop(&audio_player);
+    }
 
     return ret;
 }

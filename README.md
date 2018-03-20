@@ -43,12 +43,12 @@ Install the required packages from your package manager.
 
 ```bash
 # runtime dependencies
-sudo apt install ffmpeg libsdl2-2.0.0
+sudo apt install ffmpeg libsdl2-2.0.0 libusb-1.0-0
 
 # client build dependencies
 sudo apt install make gcc pkg-config meson \
                  libavcodec-dev libavformat-dev libavutil-dev \
-                 libsdl2-dev
+                 libsdl2-dev libusb-1.0-0-dev
 
 # server build dependencies
 sudo apt install openjdk-8-jdk

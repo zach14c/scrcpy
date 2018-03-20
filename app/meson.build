@@ -1,5 +1,6 @@
 src = [
     'src/main.c',
+    'src/audio.c',
     'src/command.c',
     'src/controlevent.c',
     'src/controller.c',
@@ -30,10 +31,13 @@ cc = meson.get_compiler('c')
 if host_machine.system() == 'windows'
     src += [ 'src/sys/win/command.c' ]
     src += [ 'src/sys/win/net.c' ]
+    src += [ 'src/sys/win/aoa.c' ]
     dependencies += cc.find_library('ws2_32')
 else
     src += [ 'src/sys/unix/command.c' ]
     src += [ 'src/sys/unix/net.c' ]
+    src += [ 'src/sys/unix/aoa.c' ]
+    dependencies += dependency('libusb-1.0')
 endif
 
 conf = configuration_data()
