@@ -117,7 +117,7 @@ SDL_bool scrcpy(const char *serial, Uint16 local_port, Uint16 max_size, Uint32 b
         LOGW("Cannot request to keep default signal handlers");
     }
 
-    if (!sdl_init_and_configure()) {
+    if (!sdl_video_init()) {
         ret = SDL_FALSE;
         goto finally_destroy_server;
     }

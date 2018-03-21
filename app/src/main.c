@@ -272,5 +272,7 @@ int main(int argc, char *argv[]) {
 
     avformat_network_deinit(); // ignore failure
 
+    SDL_Quit();
+
     return res;
 }
