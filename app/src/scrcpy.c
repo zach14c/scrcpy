@@ -30,7 +30,10 @@ static struct screen screen = SCREEN_INITIALIZER;
 static struct frames frames;
 static struct decoder decoder;
 static struct controller controller;
+
+#ifdef AUDIO_SUPPORT
 static struct audio_player audio_player;
+#endif
 
 static struct input_manager input_manager = {
     .controller = &controller,
@@ -114,11 +117,13 @@ SDL_bool scrcpy(const struct scrcpy_options *options) {
         LOGW("Cannot request to keep default signal handlers");
     }
 
+#ifdef AUDIO_SUPPORT
     if (options->forward_audio) {
         if (!audio_forwarding_start(&audio_player, options->serial)) {
             return SDL_FALSE;
         }
     }
+#endif
 
     SDL_bool ret = SDL_TRUE;
 
@@ -202,9 +207,11 @@ finally_destroy_frames:
 finally_destroy_server:
     server_destroy(&server);
 finally_disable_audio_forwarding:
+#ifdef AUDIO_SUPPORT
     if (options->forward_audio) {
         audio_forwarding_stop(&audio_player);
     }
+#endif
 
     return ret;
 }

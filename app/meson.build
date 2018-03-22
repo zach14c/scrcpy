@@ -1,6 +1,5 @@
 src = [
     'src/main.c',
-    'src/audio.c',
     'src/command.c',
     'src/controlevent.c',
     'src/controller.c',
@@ -19,6 +18,10 @@ src = [
     'src/tinyxpm.c',
 ]
 
+if get_option('audio_support')
+    src += [ 'src/audio.c' ]
+endif
+
 dependencies = [
     dependency('libavformat'),
     dependency('libavcodec'),
@@ -31,13 +34,17 @@ cc = meson.get_compiler('c')
 if host_machine.system() == 'windows'
     src += [ 'src/sys/win/command.c' ]
     src += [ 'src/sys/win/net.c' ]
-    src += [ 'src/sys/win/aoa.c' ]
+    if get_option('audio_support')
+        src += [ 'src/sys/win/aoa.c' ]
+    endif
     dependencies += cc.find_library('ws2_32')
 else
     src += [ 'src/sys/unix/command.c' ]
     src += [ 'src/sys/unix/net.c' ]
-    src += [ 'src/sys/unix/aoa.c' ]
-    dependencies += dependency('libusb-1.0')
+    if get_option('audio_support')
+        src += [ 'src/sys/unix/aoa.c' ]
+        dependencies += dependency('libusb-1.0')
+    endif
 endif
 
 conf = configuration_data()
@@ -86,6 +93,9 @@ conf.set('SKIP_FRAMES', get_option('skip_frames'))
 
 # enable High DPI support
 conf.set('HIDPI_SUPPORT', get_option('hidpi_support'))
+
+# enable audio support (enable audio forwarding with --forward-audio)
+conf.set('AUDIO_SUPPORT', get_option('audio_support'))
 
 configure_file(configuration: conf, output: 'config.h')
 

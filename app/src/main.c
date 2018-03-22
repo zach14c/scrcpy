@@ -12,7 +12,9 @@ struct args {
     const char *serial;
     SDL_bool help;
     SDL_bool version;
+#ifdef AUDIO_SUPPORT
     SDL_bool forward_audio;
+#endif
     Uint16 port;
     Uint16 max_size;
     Uint32 bit_rate;
@@ -23,10 +25,12 @@ static void usage(const char *arg0) {
         "Usage: %s [options]\n"
         "\n"
         "Options:\n"
+#ifdef AUDIO_SUPPORT
         "\n"
         "    -a, --forward-audio\n"
-        "        Forward audio from the device to the computer\n"
+        "        Forward audio from the device to the computer over USB\n"
         "        (experimental).\n"
+#endif
         "\n"
         "    -b, --bit-rate value\n"
         "        Encode the video at the given bit-rate, expressed in bits/s.\n"
@@ -185,7 +189,9 @@ static SDL_bool parse_port(char *optarg, Uint16 *port) {
 
 static SDL_bool parse_args(struct args *args, int argc, char *argv[]) {
     static const struct option long_options[] = {
+#ifdef AUDIO_SUPPORT
         {"forward-audio", no_argument,       NULL, 'a'},
+#endif
         {"bit-rate",      required_argument, NULL, 'b'},
         {"help",          no_argument,       NULL, 'h'},
         {"max-size",      required_argument, NULL, 'm'},
@@ -195,11 +201,18 @@ static SDL_bool parse_args(struct args *args, int argc, char *argv[]) {
         {NULL,            0,                 NULL, 0  },
     };
     int c;
-    while ((c = getopt_long(argc, argv, "ab:hm:p:s:v", long_options, NULL)) != -1) {
+#ifdef AUDIO_SUPPORT
+# define AUDIO_SHORT_PARAM "a"
+#else
+# define AUDIO_SHORT_PARAM
+#endif
+    while ((c = getopt_long(argc, argv, AUDIO_SHORT_PARAM "b:hm:p:s:v", long_options, NULL)) != -1) {
         switch (c) {
+#ifdef AUDIO_SUPPORT
             case 'a':
                 args->forward_audio = SDL_TRUE;
                 break;
+#endif
             case 'b':
                 if (!parse_bit_rate(optarg, &args->bit_rate)) {
                     return SDL_FALSE;
@@ -252,7 +265,9 @@ int main(int argc, char *argv[]) {
         .port = DEFAULT_LOCAL_PORT,
         .max_size = DEFAULT_MAX_SIZE,
         .bit_rate = DEFAULT_BIT_RATE,
+#ifdef AUDIO_SUPPORT
         .forward_audio = SDL_FALSE,
+#endif
     };
     if (!parse_args(&args, argc, argv)) {
         return 1;
@@ -283,7 +298,9 @@ int main(int argc, char *argv[]) {
         .port = args.port,
         .max_size = args.max_size,
         .bit_rate = args.bit_rate,
+#ifdef AUDIO_SUPPORT
         .forward_audio = args.forward_audio,
+#endif
     };
     int res = scrcpy(&options) ? 0 : 1;
 
